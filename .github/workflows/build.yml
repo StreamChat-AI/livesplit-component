@@ -1,0 +1,38 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Fetch LiveSplit assemblies
+        run: scripts/fetch-livesplit.sh
+
+      - name: Test
+        run: dotnet test tests
+
+      - name: Build
+        run: dotnet build src/StreamChatAI.LiveSplit -c Release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: StreamChatAI.LiveSplit
+          path: src/StreamChatAI.LiveSplit/bin/Release/net481/StreamChatAI.LiveSplit.dll
+
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: src/StreamChatAI.LiveSplit/bin/Release/net481/StreamChatAI.LiveSplit.dll
+          generate_release_notes: true

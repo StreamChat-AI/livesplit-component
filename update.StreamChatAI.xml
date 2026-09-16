@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<updates>
+  <update version="1.0.0">
+    <files>
+      <file path="Components/StreamChatAI.LiveSplit.dll" status="changed" />
+    </files>
+    <changelog>
+      <change>First release: gold splits, personal bests, resets and your current split for your StreamChat AI bot.</change>
+    </changelog>
+  </update>
+</updates>

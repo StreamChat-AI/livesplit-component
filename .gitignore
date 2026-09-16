@@ -1,0 +1,8 @@
+bin/
+obj/
+lib/*.dll
+artifacts/
+*.user
+.vs/
+tests/bin/
+tests/obj/
