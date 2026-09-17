@@ -56,12 +56,28 @@ namespace StreamChatAI.LiveSplit
         /// - is null for every split, which would send a run with no times, no
         /// golds and never a PB. Real Time is what the runner is actually
         /// looking at then, so that is what is sent, and said to be.
+        ///
+        /// ⚠️ Decided from the splits, not from IsGameTimeInitialized. LiveSplit
+        /// clears that flag at the moment every run starts and an auto splitter
+        /// only sets it a frame later, so asking it would describe every start
+        /// of a Game Time runner in Real Time.
         /// </summary>
         private static TimingMethod EffectiveMethod(LiveSplitState state)
         {
-            return state.CurrentTimingMethod == TimingMethod.GameTime && !state.IsGameTimeInitialized
-                ? TimingMethod.RealTime
-                : state.CurrentTimingMethod;
+            if (state.CurrentTimingMethod != TimingMethod.GameTime || state.IsGameTimeInitialized)
+            {
+                return state.CurrentTimingMethod;
+            }
+
+            foreach (var segment in state.Run)
+            {
+                if (segment.PersonalBestSplitTime.GameTime.HasValue || segment.BestSegmentTime.GameTime.HasValue)
+                {
+                    return TimingMethod.GameTime;
+                }
+            }
+
+            return TimingMethod.RealTime;
         }
 
         private static long? Ms(TimeSpan? time) => time.HasValue ? (long)Math.Round(time.Value.TotalMilliseconds) : (long?)null;
