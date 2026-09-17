@@ -85,6 +85,26 @@ namespace StreamChatAI.LiveSplit.Tests
             Assert.False((bool)Part(slower, "finish")["is_pb"]);
         }
 
+        // speedrun.com rank some boards on in-game time, so the API needs both
+        // clocks to check a world record, and the sub-categories to find the board.
+        [Fact]
+        public void A_finish_carries_both_clocks_and_the_speedrun_com_sub_categories()
+        {
+            var run = Run(390_000, 880_000, 1_650_000);
+            run.Segments[2].SplitRealMs = 1_700_000;
+            run.Segments[2].SplitGameMs = 1_650_000;
+            run.Variables["Platform"] = "PC";
+
+            var payload = EventBuilder.Split(run, "run", 2);
+
+            Assert.Equal(1_700_000L, Part(payload, "finish")["final_real_ms"]);
+            Assert.Equal(1_650_000L, Part(payload, "finish")["final_game_ms"]);
+            var variables = (List<object>)Part(payload, "run")["variables"];
+            var first = (Dictionary<string, object>)Assert.Single(variables);
+            Assert.Equal("Platform", first["name"]);
+            Assert.Equal("PC", first["value"]);
+        }
+
         [Fact]
         public void A_first_ever_finish_is_a_pb()
         {

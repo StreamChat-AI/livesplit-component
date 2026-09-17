@@ -39,6 +39,8 @@ namespace StreamChatAI.LiveSplit.Core
                     ["previous_pb_ms"] = previousPb,
                     // A first ever finish is a personal best by definition.
                     ["is_pb"] = final.HasValue && (!previousPb.HasValue || final.Value < previousPb.Value),
+                    ["final_real_ms"] = run.Segments[index].SplitRealMs,
+                    ["final_game_ms"] = run.Segments[index].SplitGameMs,
                 };
             }
 
@@ -155,8 +157,23 @@ namespace StreamChatAI.LiveSplit.Core
                     ["timing_method"] = run.TimingMethod,
                     ["pb_ms"] = PbMs(run),
                     ["sum_of_best_ms"] = SumOfBestMs(run),
+                    ["variables"] = Variables(run),
                 },
             };
+        }
+
+        private static List<object> Variables(RunSnapshot run)
+        {
+            var list = new List<object>();
+            foreach (var pair in run.Variables ?? new Dictionary<string, string>())
+            {
+                if (string.IsNullOrWhiteSpace(pair.Key) || string.IsNullOrWhiteSpace(pair.Value) || list.Count >= 20)
+                {
+                    continue;
+                }
+                list.Add(new Dictionary<string, object> { ["name"] = Limit(pair.Key), ["value"] = Limit(pair.Value) });
+            }
+            return list;
         }
 
         private static Dictionary<string, object> SplitDetail(RunSnapshot run, int index)

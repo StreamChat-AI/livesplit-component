@@ -38,6 +38,24 @@ namespace StreamChatAI.LiveSplit.Tests
         }
 
         [Fact]
+        public void Closing_sends_what_is_still_queued()
+        {
+            var sent = new ConcurrentQueue<string>();
+            var sender = new EventSender(async (token, json, cancel) =>
+            {
+                await Task.Delay(50, cancel);
+                sent.Enqueue(json);
+                return SendResult.Sent;
+            }, () => "token", NoWait);
+
+            sender.Enqueue("split");
+            sender.Enqueue("reset");
+            sender.Dispose();
+
+            Assert.Equal(new[] { "split", "reset" }, sent.ToArray());
+        }
+
+        [Fact]
         public async Task A_rejected_event_is_not_retried()
         {
             var attempts = 0;

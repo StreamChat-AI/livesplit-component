@@ -17,6 +17,13 @@ namespace StreamChatAI.LiveSplit.Core
         public string TimingMethod { get; set; }
 
         public IList<SegmentSnapshot> Segments { get; set; } = new List<SegmentSnapshot>();
+
+        /// <summary>
+        /// speedrun.com sub-categories as set in LiveSplit's splits editor:
+        /// variable name to value label. Lets the API find the right board
+        /// to check a world record against.
+        /// </summary>
+        public IDictionary<string, string> Variables { get; set; } = new Dictionary<string, string>();
     }
 
     public sealed class SegmentSnapshot
@@ -35,5 +42,13 @@ namespace StreamChatAI.LiveSplit.Core
         /// old one - which is what makes a gold detectable.
         /// </summary>
         public long? BestSegmentMs { get; set; }
+
+        /// <summary>
+        /// This attempt's split on both clocks, whatever the runner is
+        /// comparing against. speedrun.com rank some boards on real time and
+        /// some on load-removed or in-game time.
+        /// </summary>
+        public long? SplitRealMs { get; set; }
+        public long? SplitGameMs { get; set; }
     }
 }

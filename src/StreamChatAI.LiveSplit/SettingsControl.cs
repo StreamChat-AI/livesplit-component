@@ -73,6 +73,24 @@ namespace StreamChatAI.LiveSplit
             Render();
         }
 
+        // The component keeps one control across openings of Layout Settings,
+        // and a status change while the dialog was closed has no handle to
+        // render into. Rendering on show means reopening is never stale.
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+            Render();
+        }
+
+        protected override void OnVisibleChanged(EventArgs e)
+        {
+            base.OnVisibleChanged(e);
+            if (Visible)
+            {
+                Render();
+            }
+        }
+
         private static Control Spacer() => new Panel { Height = 8, Width = 1 };
 
         private void OnStatusChanged()

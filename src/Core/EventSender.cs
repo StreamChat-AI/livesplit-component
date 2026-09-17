@@ -132,17 +132,29 @@ namespace StreamChatAI.LiveSplit.Core
             await Task.Delay(50).ConfigureAwait(false);
         }
 
-        public void Dispose()
+        /// <summary>
+        /// Gives what is queued a moment to go before stopping. LiveSplit
+        /// closing mid-run resets the timer and disposes the component in the
+        /// same breath, and without this the reset is the event lost - leaving
+        /// chat told the run is still going.
+        /// </summary>
+        public void Dispose() => Dispose(TimeSpan.FromSeconds(2));
+
+        public void Dispose(TimeSpan drain)
         {
             _queue.CompleteAdding();
-            _stop.Cancel();
             try
             {
-                _worker.Wait(TimeSpan.FromSeconds(1));
+                if (!_worker.Wait(drain))
+                {
+                    _stop.Cancel();
+                    _worker.Wait(TimeSpan.FromSeconds(1));
+                }
             }
             catch (AggregateException)
             {
             }
+            _stop.Cancel();
             _stop.Dispose();
         }
     }
