@@ -6,6 +6,10 @@ on:
     tags: ['v*']
   pull_request:
 
+# Creating the release on a tag needs write access to the repository.
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
